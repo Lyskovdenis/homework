@@ -12,18 +12,27 @@
 from flask import Flask
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, StringField
-from hw2_validators import number_length, NumberLength
+from wtforms.validators import DataRequired, Email, Optional, NumberRange
+from module_04_flask.homework.hw1_3.hw2_validators import number_length, NumberLength
 
 app = Flask(__name__)
+app.config["WTF_CSRF_ENABLED"] = False
 
 
 class RegistrationForm(FlaskForm):
-    email = StringField()
-    phone = IntegerField()
-    name = StringField()
-    address = StringField()
-    index = IntegerField()
-    comment = StringField()
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    phone = IntegerField(
+        "Phone",
+        validators=[
+            DataRequired(),
+            NumberRange(min=0),
+            NumberLength(10, 10),
+        ],
+    )
+    name = StringField("Name", validators=[DataRequired()])
+    address = StringField("Address", validators=[DataRequired()])
+    index = IntegerField("Index", validators=[DataRequired()])
+    comment = StringField("Comment", validators=[Optional()])
 
 
 @app.route("/registration", methods=["POST"])
@@ -32,12 +41,12 @@ def registration():
 
     if form.validate_on_submit():
         email, phone = form.email.data, form.phone.data
-
         return f"Successfully registered user {email} with phone +7{phone}"
 
+    # временный лог для отладки
+    print("DEBUG ERRORS:", form.errors)
     return f"Invalid input, {form.errors}", 400
 
 
 if __name__ == "__main__":
-    app.config["WTF_CSRF_ENABLED"] = False
     app.run(debug=True)
