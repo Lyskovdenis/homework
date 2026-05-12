@@ -1,25 +1,53 @@
 import logging
+import logging.config
 import sys
 from pathlib import Path
 
+# --- Эмуляция отдельного файла конфигурации logging_config.py ---
+# В реальном проекте это должен быть отдельный .py файл
+LOGGING_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(levelname)s | %(name)s | %(asctime)s | %(lineno)d | %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        },
+    },
+    "handlers": {
+        "stdout": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "standard",
+            "stream": "ext://sys.stdout"
+        },
+        "level_file_handler": {
+            "()": "__main__.LevelFileHandler",
+            "base_name": "calc",
+            "level": "DEBUG",
+            "formatter": "standard"
+        },
+    },
+    "loggers": {
+        "": {
+            "handlers": ["stdout", "level_file_handler"],
+            "level": "DEBUG",
+            "propagate": False
+        },
+    }
+}
+# -----------------------------------------------------------
 
 class LevelFileHandler(logging.Handler):
     """
     Пишет логи в разные файлы в зависимости от уровня.
-    DEBUG    -> calc_debug.log
-    INFO     -> calc_info.log
-    WARNING  -> calc_warning.log
-    ERROR    -> calc_error.log
-    CRITICAL -> calc_critical.log
     """
-
     def __init__(self, base_name: str = "calc"):
         super().__init__()
         self.base_name = base_name
         self._handlers: dict[int, logging.FileHandler] = {}
 
     def _get_handler_for_level(self, levelno: int) -> logging.FileHandler:
-        """Инициализация файлового хэндлера для конкретного уровня."""
         if levelno in self._handlers:
             return self._handlers[levelno]
 
@@ -28,11 +56,9 @@ class LevelFileHandler(logging.Handler):
         path = Path(filename)
 
         fh = logging.FileHandler(path, mode="a", encoding="utf-8")
-        # важный момент: используем тот же форматтер, что установлен на LevelFileHandler
         if self.formatter is not None:
             fh.setFormatter(self.formatter)
 
-        fh.setLevel(logging.DEBUG)
         self._handlers[levelno] = fh
         return fh
 
@@ -44,38 +70,15 @@ class LevelFileHandler(logging.Handler):
             self.handleError(record)
 
     def setFormatter(self, fmt: logging.Formatter) -> None:
-        """При смене форматтера обновляем и у вложенных FileHandler'ов."""
         super().setFormatter(fmt)
         for h in self._handlers.values():
             h.setFormatter(fmt)
 
 
 def get_logger(name: str) -> logging.Logger:
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
-
-    # чтобы при повторных вызовах не плодить обработчики
-    if logger.handlers:
-        return logger
-
-    fmt = "%(levelname)s | %(name)s | %(asctime)s | %(lineno)d | %(message)s"
-    formatter = logging.Formatter(fmt, datefmt="%Y-%m-%d %H:%M:%S")
-
-    # обработчик в stdout
-    stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(logging.DEBUG)
-    stdout_handler.setFormatter(formatter)
-
-    # многоуровневый файловый обработчик
-    level_file_handler = LevelFileHandler(base_name="calc")
-    level_file_handler.setLevel(logging.DEBUG)
-    level_file_handler.setFormatter(formatter)
-
-    logger.addHandler(stdout_handler)
-    logger.addHandler(level_file_handler)
-
-    logger.propagate = False
-    return logger
+    # Применяем декларативную конфигурацию
+    logging.config.dictConfig(LOGGING_CONFIG)
+    return logging.getLogger(name)
 
 
 if __name__ == "__main__":
