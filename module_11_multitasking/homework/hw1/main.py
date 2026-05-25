@@ -4,7 +4,7 @@ import random
 import time
 from typing import List
 
-logging.basicConfig(level='INFO')
+logging.basicConfig(level="INFO")
 logger: logging.Logger = logging.getLogger(__name__)
 
 
@@ -18,31 +18,36 @@ class Philosopher(threading.Thread):
 
     def run(self) -> None:
         while self.running:
-            logger.info(f'Philosopher {self.name} start thinking.')
+            logger.info(f"Philosopher {self.name} start thinking.")
             time.sleep(random.randint(1, 10))
-            logger.info(f'Philosopher {self.name} is hungry.')
-            try:
-                self.left_fork.acquire()
-                logger.info(f'Philosopher {self.name} acquired left fork')
+
+            logger.info(f"Philosopher {self.name} is hungry.")
+
+            # Берём сначала левую вилку
+            with self.left_fork:
+                logger.info(f"Philosopher {self.name} acquired left fork")
+
+                # Если правая уже занята — НЕ берём её и просто выходим из with,
+                # тем самым освобождаем левую и идём думать дальше
                 if self.right_fork.locked():
-                    continue
-                try:
-                    self.right_fork.acquire()
-                    logger.info(f'Philosopher {self.name} acquired right fork')
-                    self.dining()
-                finally:
-                    self.right_fork.release()
-            finally:
-                self.left_fork.release()
+                    logger.info(
+                        f"Philosopher {self.name} sees right fork locked, "
+                        f"releases left fork and continues thinking"
+                    )
+                else:
+                    # Берём правую вилку
+                    with self.right_fork:
+                        logger.info(f"Philosopher {self.name} acquired right fork")
+                        self.dining()
 
     def dining(self) -> None:
-        logger.info(f'Philosopher {self.name} starts eating.')
+        logger.info(f"Philosopher {self.name} starts eating.")
         time.sleep(random.randint(1, 10))
-        logger.info(f'Philosopher {self.name} finishes eating and leaves to think.')
+        logger.info(f"Philosopher {self.name} finishes eating and leaves to think.")
 
 
 def main() -> None:
-    forks: List[threading.Lock] = [threading.Lock() for n in range(5)]
+    forks: List[threading.Lock] = [threading.Lock() for _ in range(5)]
     philosophers: List[Philosopher] = [
         Philosopher(forks[i % 5], forks[(i + 1) % 5])
         for i in range(5)
