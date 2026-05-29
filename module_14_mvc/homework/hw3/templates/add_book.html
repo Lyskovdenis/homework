@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-style-10">
+    <h1>Add new book!<span>Fill the fields and and new books to the DB!</span></h1>
+
+    <form action="{{ url_for('get_books_form') }}" method="post">
+        {{ form.hidden_tag() }}
+
+        <div class="section"><span>1</span>Book title</div>
+        <div class="inner-wrap">
+            <label>
+                Book title
+                {{ form.book_title(size=40) }}
+            </label>
+            {% for error in form.book_title.errors %}
+                <p style="color: red">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <div class="section"><span>2</span>Author full name</div>
+        <div class="inner-wrap">
+            <label>
+                Author full name
+                {{ form.author_name(size=40) }}
+            </label>
+            {% for error in form.author_name.errors %}
+                <p style="color: red">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <div class="button-section">
+            <input type="submit" value="Add new book"/>
+        </div>
+    </form>
+</div>
+{% endblock %}

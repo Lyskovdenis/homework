@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Books list</h2>
+
+  <p><a href="{{ url_for('get_books_form') }}">Add new book</a></p>
+
+  {% if books %}
+    <ul>
+    {% for book in books %}
+      <li>#{{ book["id"] }} — {{ book["title"] }} ({{ book["author"] }})</li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <p>No books yet.</p>
+  {% endif %}
+{% endblock %}
