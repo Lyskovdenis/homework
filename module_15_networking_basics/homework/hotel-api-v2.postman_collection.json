@@ -1,0 +1,102 @@
+{
+  "info": {
+    "_postman_id": "hotel-api-v2-id",
+    "name": "hotel-api-v2",
+    "description": "Улучшенная версия контракта API (уровень 2 по модели Ричардсона).\\n\\nИзменения:\\n- URI: /room → /rooms, /add-room → POST /rooms, /booking → POST /bookings\\n- Использование существительных вместо глаголов в URI\\n- Единообразные имена параметров (guests)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "url",
+      "value": "http://127.0.0.1:5000"
+    },
+    {
+      "key": "checkInDate",
+      "value": "20210308"
+    },
+    {
+      "key": "checkOutDate",
+      "value": "20210311"
+    }
+  ],
+  "item": [
+    {
+      "name": "Rooms",
+      "item": [
+        {
+          "name": "GET /rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/rooms?checkIn={{checkInDate}}&checkOut={{checkOutDate}}&guests=2",
+              "host": ["{{url}}"],
+              "path": ["rooms"],
+              "query": [
+                {
+                  "key": "checkIn",
+                  "value": "{{checkInDate}}"
+                },
+                {
+                  "key": "checkOut",
+                  "value": "{{checkOutDate}}"
+                },
+                {
+                  "key": "guests",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /rooms",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"floor\": 1,\\n  \"beds\": 1,\\n  \"guests\": 2,\\n  \"price\": 1000\\n}"
+            },
+            "url": {
+              "raw": "{{url}}/rooms",
+              "host": ["{{url}}"],
+              "path": ["rooms"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "POST /bookings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"bookingDates\": {\\n    \"checkIn\": \"{{checkInDate}}\",\\n    \"checkOut\": \"{{checkOutDate}}\"\\n  },\\n  \"firstName\": \"John\",\\n  \"lastName\": \"Smith\",\\n  \"roomId\": 1\\n}"
+            },
+            "url": {
+              "raw": "{{url}}/bookings",
+              "host": ["{{url}}"],
+              "path": ["bookings"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
