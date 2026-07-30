@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: skillbox_postgres
+    environment:
+      POSTGRES_DB: skillbox_db
+      POSTGRES_USER: skillbox_user
+      POSTGRES_PASSWORD: skillbox_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./pg_logs:/var/lib/postgresql/logs
+    command:
+      [
+        "postgres",
+        "-c", "log_destination=stderr",
+        "-c", "logging_collector=on",
+        "-c", "log_directory=/var/lib/postgresql/logs"
+      ]
+    networks:
+      - skillbox_net
+
+  app:
+    build: .
+    container_name: skillbox_app
+    command: gunicorn app:app --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://skillbox_user:skillbox_pass@db:5432/skillbox_db
+    depends_on:
+      - db
+    networks:
+      - skillbox_net
+
+volumes:
+  pg_data:
+
+networks:
+  skillbox_net:
