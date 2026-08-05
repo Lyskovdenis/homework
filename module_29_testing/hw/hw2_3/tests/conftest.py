@@ -1,7 +1,8 @@
 import pytest
+
 from app import create_app
 from extensions import db
-from models import Client, Parking, ClientParking
+from models import Client, Parking
 
 
 @pytest.fixture
