@@ -11,6 +11,9 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: module_29_testing/hw/hw2_3
 
     steps:
       - name: Checkout repository
@@ -27,24 +30,16 @@ jobs:
           pip install Flask Flask-SQLAlchemy factory-boy Faker pytest flake8 black isort mypy
 
       - name: Run black
-        working-directory: module_29_testing/hw/hw2_3
         run: python -m black --check .
 
       - name: Run isort
-        working-directory: module_29_testing/hw/hw2_3
         run: python -m isort --check-only .
 
       - name: Run flake8
-        working-directory: module_29_testing/hw/hw2_3
         run: python -m flake8 .
 
       - name: Run mypy
-        working-directory: module_29_testing/hw/hw2_3
         run: python -m mypy --explicit-package-bases --ignore-missing-imports .
-
-      - name: Run tests
-        working-directory: module_29_testing/hw/hw2_3
-        run: pytest
 
       - name: Run tests
         run: pytest
