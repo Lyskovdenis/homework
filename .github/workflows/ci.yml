@@ -48,13 +48,7 @@ jobs:
         run: python -m flake8 .
 
       - name: Run mypy
-        run: python -m mypy
-hw2_3-ci-fix
-
-
-      - name: Run tests
-        run: pytest
-main
+        run: python -m mypy .
 
       - name: Run tests
         run: pytest
