@@ -1,7 +1,9 @@
 from datetime import datetime
+
 from flask import Flask, jsonify, request
+
 from extensions import db
-from models import Client, Parking, ClientParking
+from models import Client, ClientParking, Parking
 
 
 def create_app():
@@ -65,9 +67,7 @@ def create_app():
             return jsonify({"error": "No available places"}), 400
 
         existing = ClientParking.query.filter_by(
-            client_id=client.id,
-            parking_id=parking.id,
-            time_out=None
+            client_id=client.id, parking_id=parking.id, time_out=None
         ).first()
         if existing:
             return jsonify({"error": "Client already parked here"}), 400
@@ -94,9 +94,7 @@ def create_app():
             return jsonify({"error": "Client or parking not found"}), 404
 
         record = ClientParking.query.filter_by(
-            client_id=client.id,
-            parking_id=parking.id,
-            time_out=None
+            client_id=client.id, parking_id=parking.id, time_out=None
         ).first()
 
         if not record:
@@ -110,10 +108,15 @@ def create_app():
 
         db.session.commit()
 
-        return jsonify({
-            "message": "Payment successful",
-            "parking_record": record.to_dict(),
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": "Payment successful",
+                    "parking_record": record.to_dict(),
+                }
+            ),
+            200,
+        )
 
     return app
 

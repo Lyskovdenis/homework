@@ -1,7 +1,8 @@
 import pytest
+
 from extensions import db
-from models import Client, Parking
 from factories import ClientFactory, ParkingFactory
+from models import Client, Parking
 
 
 @pytest.mark.parametrize(
